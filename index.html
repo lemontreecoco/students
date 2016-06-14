@@ -1,0 +1,264 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+	<title>Document</title>
+</head>
+<style>
+    *{
+    	margin:0;
+    	padding:0;
+    	font-family: "微软雅黑";
+    }
+	.box{
+		width: 666px;
+		height: auto;
+		margin:0 auto;
+		border:1px solid #B61D1D;
+		text-align: center;
+		margin-top:100px;
+	}
+	table{
+		text-align: center;
+		width: 610px;
+		height: auto;
+		border-spacing: 0;
+		margin:0 auto;
+	}
+	.tbody td{
+		font-size: 14px;
+		color: #666;
+		width: 14%;
+		border-bottom: 1px solid #ccc;
+		padding: 8px  0px;
+    }
+	caption{
+		text-align: center;
+		font-size: 24px;
+		color: #666;
+		margin-top: 15px;
+		margin-bottom: 15px;
+	}
+	.add{
+		display: inline-block;
+		padding:8px 20px;
+        background: #B61D1D;
+        color: #fff;
+        margin-top: 15px;
+        margin-bottom: 15px;
+        cursor: pointer;
+    }
+    .remove{
+        display: inline-block;
+        padding:8px 20px;
+        background:#B61D1D;
+        color:#fff;
+        margin-top: 15px;
+        margin-bottom: 15px;
+        cursor: pointer;
+    }
+   .tbody input{
+    	width: 80%;
+    	border:0;
+    	outline: none;
+    	border-bottom: 1px solid #B61D1D;
+    	text-align: center;
+    }
+    .change{
+        cursor: pointer;
+    }
+    .delete{
+        cursor: pointer;
+    }
+</style>
+<body>
+	<div class="box">
+		<table>
+			<caption>学生管理系统</caption>
+			<thead>
+				<tr>
+					<th data_role="id">学号</th>
+					<th data_role="name">姓名</th>
+					<th data_role="sex">性别</th>
+					<th data_role="age">年龄</th>
+					<th data_role="jiguan">籍贯</th>
+					<th data_role="haoma">身份证号</th>
+					<th><input type="checkbox" class="togglecheck"></th>
+				</tr>
+		    </thead>
+		    <tbody class="tbody">
+		    </tbody>
+		</table>
+        <ul>
+    		<li class="add">✚</li>
+            <li class="remove">✘</li>
+        </ul>
+	</div>
+</body>
+<script>
+    if(localStorage.students){ //如果localStorage中有students对象
+    	var students=JSON.parse(localStorage.students);
+    	//将localStorage中的students通过JSON.parse重新转化为对象
+    }else{
+		var students=[
+		    {id:1005,name:'小马',sex:'男',age:21,jiguan:'山西',haoma:'140......'},
+	        {id:1001,name:'coco',sex:'女',age:18,jiguan:'山西',haoma:'138......'},
+	        {id:1004,name:'小马',sex:'男',age:21,jiguan:'山西',haoma:'152......'},
+	        {id:1003,name:'coco',sex:'女',age:18,jiguan:'山西',haoma:'166......'},
+	        {id:1002,name:'小马',sex:'男',age:21,jiguan:'山西',haoma:'188......'}
+		];
+		localStorage.setItem("students",JSON.stringify(students));
+		//将students中的内容存储到浏览器中
+    }
+    var tbody=document.querySelector(".tbody");
+    var xuanran=function(){
+        tbody.innerHTML='';
+    	for(var i in students){
+			var _d=students[i];
+            var el=document.createElement("tr");
+            el.setAttribute('data-id',_d.id);//给el创建自定义属性
+		    el.innerHTML='<td>'+_d.id+'</td><td data_role="name">'+_d.name+'</td><td data_role="sex">'+_d.sex+'</td><td data_role="age">'+_d.age+'</td><td data_role="jiguan">'+_d.jiguan+'</td><td data_role="haoma">'+_d.haoma+'</td><td><input class="ck" type="checkbox" value="'+_d.id+'"></td>';
+		    tbody.appendChild(el);
+	    }
+	}
+	xuanran();
+	var togglecheck=document.querySelector(".togglecheck");
+    togglecheck.onclick=function(){
+        var els=tbody.querySelectorAll('input[type="checkbox"]');
+        for(var i=0,el;i<els.length;i++){
+            el=els[i];
+            el.checked=this.checked;
+        }
+    }
+    //从界面中删除信息
+    var remove=document.querySelector(".remove");
+    remove.onclick=function(){
+        var els=tbody.querySelectorAll('input[type=checkbox]');
+        console.log(els);
+        for(var i=0,el;i<els.length;i++){
+            el=els[i];
+            if(el.checked){
+                tbody.removeChild(el.parentElement.parentElement);
+                deletestudent(el.value);
+            }
+        }
+        togglecheck.checked=false;
+        // togglecheck=this.checked;
+    }
+    //在内存中删除信息
+    var deletestudent=function(id){
+        id=Number(id);
+    	console.table(students);
+    	var _s=[];
+    	for(var k in students){
+            var v=students[k];
+            if(v.id!==id){//如果
+            	_s.push(v);
+            }
+        }
+    	students=_s;//将_s中的数据给了students
+        localStorage.setItem("students",JSON.stringify(students));//将studens中的数据存储到本地中
+        console.table(students);
+    }
+
+    tbody.onclick=function(e){
+    	var el=e.target;
+        if(el.nodeName==="TD"){
+            if(tbody.querySelector('.editing')){
+                toggleEdit(tbody.querySelector('.editing'));
+            }
+            toggleEdit(el.parentElement);
+        }else if(el.classList.contains('ck')){
+            var els=tbody.querySelectorAll(".ck");
+            for(var i=0,el,j=0;i<els.length;i++){
+                el=els[i];
+                if(el.checked){
+                    j+=1;
+                }
+            }
+            if(j===students.length){
+                togglecheck.checked=true;
+            }else{
+                togglecheck.checked=false;
+            }
+        }
+    }
+    //实现学号递增
+    var add=document.querySelector(".add");
+    add.onclick=function(){
+       if(students.length){
+       	  var xuehao=students[students.length-1].id+1;
+       }else{
+       	xuehao=1001;
+       }
+       //把一个新学生放到数据里
+       var _d={id:xuehao,name:'',sex:'',age:'',jiguan:'',haoma:''};
+       students.push(_d);
+       localStorage.setItem("students",JSON.stringify(students));
+       var tr=document.createElement("tr");
+			// console.log(_d.id)
+		    tr.innerHTML='<td>'+_d.id+'</td><td  data_role="name" >'+_d.name+'</td><td  data_role="sex">'+_d.sex+'</td><td  data_role="age">'+_d.age+'</td><td  data_role="jiguan">'+_d.jiguan+'</td><td  data_role="haoma">'+_d.haoma+'</td><td><input type="checkbox" value="'+_d.id+'"></td>';
+		    tbody.appendChild(tr);
+
+    }
+    var toggleEdit=function(tr){
+
+    	var els=tr.querySelectorAll('td[data_role]');
+    	console.log(els);
+    	if(tr.classList.contains('editing')){
+	    	for(var i=0,el,tmp;i<els.length;i++){
+	    		el=els[i];
+	    		tmp = el.querySelector('input').value;
+	    		el.innerHTML=tmp;
+	    	}
+    	tr.classList.remove('editing');
+    	// tr.querySelector('.change').innerHTML='';
+        }else{
+	    	for(var i=0,el,tmp;i<els.length;i++){
+	    		el=els[i];
+	            tmp=el.innerHTML;
+	            el.innerHTML='<input type="text" value="'+tmp+'">';
+	    	}
+            els[1].querySelector('input').focus();
+	    	tr.classList.add('editing');
+	    	// tr.querySelector('.change').innerHTML='';
+	    }
+    }
+    var updatestudent=function(xuehao,key,value){
+    	console.table(students);
+    	xuehao=Number(xuehao);
+    	for(var i=0;i<students.length;i++){
+    		if(students[i].id===xuehao){
+    			students[i][key]=value;
+    		}
+    	}
+    	localStorage.students=JSON.stringify(students);
+    }
+    var timerId;
+    tbody.onkeyup=function(e){
+    	var el=e.target;
+    	console.log(el);
+    	var xuehao=el.parentElement.parentElement.getAttribute('data-id');
+    	var key=el.parentElement.getAttribute('data_role');
+    	var value=el.value;
+    	clearTimeout(timerId);
+    	timerId=setTimeout(function(){
+    		updatestudent(xuehao,key,value)
+    	},1000);
+    }
+    var thead=document.querySelector('table thead');
+    thead.onclick=function(e){
+         var el=e.target;
+        if(el.nodeName==='TH'){
+            var sortkey=el.getAttribute('data_role');
+            console.log(sortkey)
+            var state=(el.getAttribute('flag')=='true')?true:false;
+            el.setAttribute('flag',!state);
+            students=students.sort(function(x,y){
+                return state?(x[sortkey]<y[sortkey]):(x[sortkey]>y[sortkey]);
+            })
+            xuanran();
+        }
+    }
+</script>
+</html>
